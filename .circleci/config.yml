@@ -1,0 +1,30 @@
+version: 2.1
+jobs:
+  build_test:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - run:
+        name: Install npm dependencies 
+        command: |
+          npm install --save
+  build_docker_image:
+    docker:
+      - image: circleci/node:12
+    steps:
+      - checkout
+      - setup_remote_docker:
+        docker_layer_chaching: false
+      - run:
+        name: Build docker image
+        command: |
+          docker build -t singhxabhijeet/CI-CD-Pipeline:latest .
+          echo $DOCKER_PASSWORD | docker login -u singhxabhijeet --password-stdin
+          docker push singhxabhijeet/CI-CD-Pipeline:latest
+
+workflows:
+  build_test:
+    jobs:
+      - build_test
+      - build_docker_image
